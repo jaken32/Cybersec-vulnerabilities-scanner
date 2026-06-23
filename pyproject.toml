@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "websec-scanner"
+version = "1.0.0"
+description = "Passive web security posture scanner with server-tailored remediation. Defensive, authorized use only."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "websec-scanner contributors" }]
+keywords = ["security", "scanner", "headers", "tls", "remediation", "defensive"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Security",
+]
+
+dependencies = [
+  "fastapi==0.115.6",
+  "uvicorn[standard]==0.34.0",
+  "httpx==0.28.1",
+  "beautifulsoup4==4.12.3",
+  "dnspython==2.7.0",
+  "slowapi==0.1.9",
+  "pydantic==2.10.4",
+  "jinja2==3.1.5",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==8.3.4",
+  "pytest-asyncio==0.25.0",
+]
+
+[project.scripts]
+websec-scan = "scanner.reporting.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/your-org/websec-scanner"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

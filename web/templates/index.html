@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Passive web security scanner with tailored, copy-paste remediation for your server stack. Authorized, defensive use only.">
+  <title>websec-scanner — passive security posture &amp; remediation</title>
+  <link rel="preconnect" href="/static">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">websec<span class="brand-dim">/scanner</span></span>
+    </div>
+    <p class="topbar-note">Passive checks &middot; authorized use only</p>
+  </div>
+</header>
+
+<main id="main" class="wrap layout">
+
+  <!-- ===================== Scan panel ===================== -->
+  <section class="panel form-panel" aria-labelledby="scan-h">
+    <div class="panel-head">
+      <h1 id="scan-h">Scan a site you own</h1>
+      <p class="lede">Enter a URL to run passive security checks. You get a graded
+        report and copy-paste fixes tailored to your server.</p>
+    </div>
+
+    <form id="scan-form" novalidate>
+      <div class="field">
+        <label for="url">Target URL</label>
+        <input id="url" name="url" type="url" inputmode="url" autocomplete="off"
+               spellcheck="false" placeholder="https://example.com"
+               aria-describedby="url-help url-error" required>
+        <p id="url-help" class="help">http or https only. Private, internal, and
+          cloud-metadata addresses are blocked.</p>
+        <p id="url-error" class="inline-error" role="alert" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="server">Server stack <span class="muted">(for tailored fixes)</span></label>
+        <div class="select-wrap">
+          <select id="server" name="server">
+            <option value="auto">Auto-detect (recommended)</option>
+            <option value="nginx">nginx</option>
+            <option value="apache">Apache</option>
+            <option value="cloudflare">Cloudflare</option>
+            <option value="generic">Generic / other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="consent">
+        <label class="check">
+          <input id="authorized" name="authorized" type="checkbox"
+                 aria-describedby="legal">
+          <span>I confirm I am authorized to scan this target.</span>
+        </label>
+        <p id="legal" class="legal">
+          This tool performs passive analysis and light, non-destructive checks
+          only. Scanning systems you do not own or lack permission to test may be
+          illegal. Your confirmation is logged with a timestamp.
+        </p>
+        <p id="consent-error" class="inline-error" role="alert" hidden></p>
+      </div>
+
+      <button id="submit" class="btn btn-primary" type="submit">
+        <span class="btn-label">Run scan</span>
+      </button>
+    </form>
+  </section>
+
+  <!-- ===================== Results column ===================== -->
+  <section class="results-col" aria-live="polite">
+
+    <!-- Idle / empty state -->
+    <div id="state-empty" class="panel empty-state">
+      <div class="empty-mark" aria-hidden="true"></div>
+      <h2>No scan yet</h2>
+      <p>Results will appear here. The scanner reviews HTTP security headers,
+        TLS/SSL, cookies, information disclosure, DNS &amp; email authentication,
+        content integrity, and technology fingerprint.</p>
+      <p class="fineprint">Automated scanning catches configuration and
+        surface-level issues. It cannot find business-logic flaws, auth bypasses,
+        or most injection vulnerabilities — those need manual testing.</p>
+    </div>
+
+    <!-- Progress state -->
+    <div id="state-progress" class="panel progress-state" hidden>
+      <h2>Scanning…</h2>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+           aria-valuenow="0" aria-label="Scan progress">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <p id="progress-msg" class="progress-msg">Starting…</p>
+      <ol id="progress-log" class="progress-log"></ol>
+      <button id="cancel" class="btn btn-ghost" type="button">Cancel</button>
+    </div>
+
+    <!-- Error state -->
+    <div id="state-error" class="panel error-state" role="alert" hidden>
+      <h2>Scan could not run</h2>
+      <p id="error-msg"></p>
+      <button id="retry" class="btn btn-ghost" type="button">Dismiss</button>
+    </div>
+
+    <!-- Result state -->
+    <div id="state-result" hidden>
+      <div class="panel grade-panel">
+        <div id="grade-card" class="grade-card" role="img" aria-label="Overall grade">
+          <span id="grade-letter" class="grade-letter">–</span>
+          <span id="grade-score" class="grade-score"></span>
+        </div>
+        <div class="grade-meta">
+          <p class="grade-target" id="result-target"></p>
+          <p class="grade-sub" id="result-sub"></p>
+          <div id="chips" class="chips"></div>
+          <a id="download" class="btn btn-secondary" download>Download HTML report</a>
+        </div>
+      </div>
+
+      <div class="filters" role="tablist" aria-label="Filter findings by severity">
+        <button class="filter is-active" data-filter="all" role="tab" aria-selected="true" type="button">All</button>
+        <button class="filter" data-filter="critical" role="tab" aria-selected="false" type="button">Critical</button>
+        <button class="filter" data-filter="high" role="tab" aria-selected="false" type="button">High</button>
+        <button class="filter" data-filter="medium" role="tab" aria-selected="false" type="button">Medium</button>
+        <button class="filter" data-filter="low" role="tab" aria-selected="false" type="button">Low</button>
+        <button class="filter" data-filter="info" role="tab" aria-selected="false" type="button">Info</button>
+      </div>
+
+      <div id="findings" class="findings"></div>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <p>websec-scanner v{{ version }} — a defensive tool for authorized use only.
+      Passive analysis of publicly returned data plus light, non-destructive
+      checks. No exploitation, brute-forcing, or fuzzing.</p>
+  </div>
+</footer>
+
+<!-- Templates cloned by JS (kept out of script for CSP-safe DOM building) -->
+<template id="tmpl-finding">
+  <article class="finding">
+    <header class="finding-head">
+      <span class="badge"><span class="badge-glyph" aria-hidden="true"></span><span class="badge-label"></span></span>
+      <h3 class="finding-title"></h3>
+      <span class="finding-cat"></span>
+    </header>
+    <p class="finding-desc"></p>
+    <div class="evidence">
+      <span class="block-label">Evidence</span>
+      <pre><code class="evidence-code"></code></pre>
+    </div>
+    <div class="remediation" hidden>
+      <p class="why"><span class="block-label">Why this matters</span> <span class="why-text"></span></p>
+      <div class="rtabs" role="tablist" aria-label="Remediation by server"></div>
+      <div class="snippet-wrap">
+        <button class="copy-btn" type="button">Copy</button>
+        <pre><code class="snippet-code"></code></pre>
+      </div>
+      <ul class="refs"></ul>
+    </div>
+  </article>
+</template>
+
+<script src="/static/js/app.js" defer></script>
+</body>
+</html>
