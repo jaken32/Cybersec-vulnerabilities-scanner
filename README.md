@@ -1,6 +1,6 @@
 # websec-scanner
 
-[![tests](https://github.com/your-org/websec-scanner/actions/workflows/tests.yml/badge.svg)](https://github.com/your-org/websec-scanner/actions/workflows/tests.yml)
+[![tests](https://github.com/jaken32/Cybersec-vulnerabilities-scanner/actions/workflows/tests.yml/badge.svg)](https://github.com/jaken32/Cybersec-vulnerabilities-scanner/actions/workflows/tests.yml)
 
 A passive web-security posture scanner with **server-tailored, copy-paste
 remediation**. Point it at a site you own, and it returns an A–F grade, a
